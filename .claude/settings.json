@@ -1,0 +1,12 @@
+{
+  "allowedTools": [],
+  "permissionRules": [],
+  "ignorePatterns": [
+    "node_modules/**",
+    ".next/**",
+    "dist/**",
+    "build/**"
+  ],
+  "exampleFiles": [],
+  "env": {}
+}

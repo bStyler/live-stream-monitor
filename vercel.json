@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/poll-youtube",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/prune-data",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
