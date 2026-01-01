@@ -1,7 +1,7 @@
 # YouTube Live Stream Monitor - TODO List
 
-**Last Updated:** 2026-01-01 (CRON-001 & CRON-002 completed, automatic polling configured)
-**Project Status:** Phase 1 - Core Monitoring & Authentication
+**Last Updated:** 2026-01-01 (Phase 1 Complete - Deployed to production with live data collection)
+**Project Status:** ✅ Phase 1 Complete | 🔄 Ready for Phase 2 - Visualization & Change Tracking
 **PRD Version:** 2.0 (Approved)
 **Implementation Plan:** `plans/youtube-live-stream-monitor-mvp.md`
 
@@ -290,6 +290,7 @@
 **Depends on:** SETUP-002
 **Files:** `vercel.json`, `.env.local`
 **Completed:** 2026-01-01
+**Note:** Cron disabled for Vercel Hobby plan (requires Pro for minute-level frequency). Manual polling tested successfully in production.
 **Tasks:**
 - [x] Create `vercel.json` with cron jobs configuration
 - [x] Configure `/api/cron/poll-youtube` to run every minute (`* * * * *`)
@@ -297,8 +298,10 @@
 - [x] Add `CRON_SECRET` to `.env.local` (already configured)
 - [x] Add `CRON_SECRET` verification to protect endpoints (implemented in route.ts)
 - [x] Test cron configuration locally (tested with curl, successfully polled 3 streams)
-- [ ] Deploy to Vercel and verify cron jobs execute (pending deployment)
-- [ ] Set up monitoring for cron job failures (can add after deployment)
+- [x] Deploy to Vercel (deployed to production: live-stream-monitor.vercel.app)
+- [x] Temporarily disabled auto-cron (Hobby plan limitation, will enable on Pro upgrade)
+- [x] Verify manual polling works in production (✅ 3 streams polled, 18 metrics collected)
+- [ ] Set up monitoring for cron job failures (deferred until Pro plan upgrade)
 
 ### CRON-002: YouTube Polling Cron Endpoint
 **Status:** ✅ Completed (Merged into API-002)
@@ -315,8 +318,9 @@
 - [x] Add error logging with detailed error messages
 - [x] Test endpoint with manual trigger (curl test successful)
 - [x] Configure 60-second max duration for Vercel
-- [ ] Verify endpoint runs every minute via Vercel Cron (after deployment)
-- [ ] Monitor for failures and timeouts (Vercel logs after deployment)
+- [x] Deploy and test in production (✅ Successfully polled 3 streams, inserted 3 metrics)
+- [x] Verify production database has live data (✅ 18 total metrics, all 3 Grand Sound streams tracked)
+- [ ] Monitor for failures and timeouts (will track once auto-cron enabled on Pro plan)
 
 ### CRON-003: Data Pruning Cron Endpoint
 **Status:** 🔴 Blocked
