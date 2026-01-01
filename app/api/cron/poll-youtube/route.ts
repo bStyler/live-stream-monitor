@@ -38,9 +38,8 @@ export async function GET(req: NextRequest) {
     console.log('✅ Cron job completed successfully');
 
     return Response.json({
-      success: true,
-      timestamp: new Date().toISOString(),
       ...result,
+      timestamp: new Date().toISOString(),
     });
   } catch (error: any) {
     console.error('❌ Cron job failed:', error);

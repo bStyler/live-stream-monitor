@@ -22,9 +22,6 @@ function getYouTubeClient(): youtube_v3.Youtube {
   return _youtube;
 }
 
-// ETag cache for quota optimization (304 Not Modified responses)
-const etagCache = new Map<string, string>();
-
 // Quota tracking (for monitoring and admin alerts)
 let dailyQuotaUsed = 0;
 const QUOTA_LIMIT = 10000;
@@ -58,23 +55,16 @@ export async function fetchStreamData(videoIds: string[]): Promise<youtube_v3.Sc
  * Fetch a single batch of video IDs (max 50)
  */
 async function fetchBatch(videoIds: string[]): Promise<youtube_v3.Schema$Video[]> {
-  const batchKey = videoIds[0]; // Use first video ID as cache key
-  const etag = etagCache.get(batchKey);
-
   try {
-    const response = await getYouTubeClient().videos.list({
+    const params: youtube_v3.Params$Resource$Videos$List = {
       part: ['snippet', 'liveStreamingDetails', 'statistics'],
-      id: videoIds.join(','),
-      ...(etag && { headers: { 'If-None-Match': etag } }),
-    });
+      id: videoIds,
+    };
+
+    const response = await getYouTubeClient().videos.list(params);
 
     // Track quota usage (videos.list costs 1 unit per request)
     dailyQuotaUsed += 1;
-
-    // Cache ETag for next request
-    if (response.headers.etag) {
-      etagCache.set(batchKey, response.headers.etag);
-    }
 
     // Check for quota warnings (at 80% usage)
     if (dailyQuotaUsed > QUOTA_LIMIT * 0.8) {
@@ -83,14 +73,14 @@ async function fetchBatch(videoIds: string[]): Promise<youtube_v3.Schema$Video[]
 
     return response.data.items || [];
   } catch (error: any) {
-    return handleYouTubeError(error, videoIds);
+    return await handleYouTubeError(error, videoIds);
   }
 }
 
 /**
  * Handle YouTube API errors with appropriate retry and fallback strategies
  */
-function handleYouTubeError(error: any, videoIds: string[]): youtube_v3.Schema$Video[] {
+async function handleYouTubeError(error: any, videoIds: string[]): Promise<youtube_v3.Schema$Video[]> {
   const statusCode = error.code || error.response?.status;
 
   // Quota exceeded (403)
@@ -273,7 +263,6 @@ export function getQuotaUsage() {
  */
 export function resetQuota() {
   dailyQuotaUsed = 0;
-  etagCache.clear();
   console.log('YouTube API quota reset');
 }
 
