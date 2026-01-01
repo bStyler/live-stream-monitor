@@ -1,4 +1,3 @@
 {
-  "_comment": "Cron jobs disabled for Hobby plan - requires Vercel Pro for minute-level cron",
   "crons": []
 }
