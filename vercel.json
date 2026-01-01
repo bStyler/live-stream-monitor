@@ -1,12 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/poll-youtube",
-      "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/cron/prune-data",
-      "schedule": "0 0 * * *"
-    }
-  ]
+  "_comment": "Cron jobs disabled for Hobby plan - requires Vercel Pro for minute-level cron",
+  "crons": []
 }
