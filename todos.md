@@ -357,6 +357,26 @@
 
 ## Phase 2: Visualization & Change Tracking (Weeks 5-6)
 
+### INFRA-001: Vercel Pro Upgrade & Enable Auto-Polling
+**Status:** 🟡 Ready
+**Priority:** P0
+**Depends on:** None (Phase 1 complete)
+**Files:** `vercel.json`
+**Tasks:**
+- [ ] Upgrade Vercel account from Hobby to Pro plan
+- [ ] Enable cron jobs in `vercel.json`:
+  - [ ] `/api/cron/poll-youtube` - every minute (`* * * * *`)
+  - [ ] `/api/cron/prune-data` - daily at 00:00 UTC (`0 0 * * *`)
+- [ ] Redeploy to production with cron enabled
+- [ ] Verify cron job executes every minute (check Vercel logs)
+- [ ] Monitor first 24 hours of automatic polling:
+  - [ ] Verify metrics collected continuously (1,440 polls per day × 3 streams = 4,320 metrics/day)
+  - [ ] Check for any timeout errors (should stay under 60s limit)
+  - [ ] Verify YouTube API quota usage stays under daily limit
+- [ ] Set up Vercel monitoring dashboard
+- [ ] Configure alerts for cron job failures
+- [ ] Document Pro plan features being used
+
 ### CHART-001: Chart Library Integration
 **Status:** 🔴 Blocked
 **Priority:** P0
