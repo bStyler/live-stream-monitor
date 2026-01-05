@@ -1,7 +1,7 @@
 # YouTube Live Stream Monitor - TODO List
 
-**Last Updated:** 2026-01-05 (CHART-006 Complete! Real-Time Updates & Data Freshness!)
-**Project Status:** ✅ Phase 1 Complete | 🟢 Phase 2 In Progress (CHART-005 ✅, CHART-006 ✅)
+**Last Updated:** 2026-01-05 (CHART-006 Enhanced! Header auto-refresh + dynamic Y-axis scaling)
+**Project Status:** ✅ Phase 1 Complete | 🟢 Phase 2 In Progress (CHART-005 ✅, CHART-006 ✅ Enhanced)
 **PRD Version:** 2.0 (Approved)
 **Implementation Plan:** `plans/youtube-live-stream-monitor-mvp.md`
 
@@ -510,6 +510,9 @@
 - 11 unit tests passing (TDD approach)
 - Browser tested and verified working (sign-in, freshness badge, auto-refresh)
 - Fixed auth port configuration (3001 → 3000) for local development
+- **Enhancement (2026-01-05):** Added header metrics auto-refresh (viewers, likes, views update every 60s)
+- **Enhancement (2026-01-05):** Dynamic Y-axis scaling with 5% buffer for better visibility of small changes
+- Commit: 9491ac2 - "feat(charts): add real-time header metrics and dynamic Y-axis scaling"
 **Tasks:**
 - [x] Install and configure TanStack Query for data fetching
 - [x] Wrap chart component with QueryClientProvider
