@@ -1,7 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot } from 'recharts';
 import { format } from 'date-fns';
+import { downsample } from '@/lib/downsample';
 
 interface MetricDataPoint {
   timestamp: string;
@@ -26,6 +28,16 @@ interface StreamChartProps {
 }
 
 export function StreamChart({ data, changes = [], metric, timeRange }: StreamChartProps) {
+  // Apply downsampling for 30-day view to improve performance
+  // 30 days × 1440 minutes = 43,200 points → downsample to 2,000 points
+  const chartData = useMemo(() => {
+    if (timeRange === '30d' && data.length > 2000) {
+      console.log(`Downsampling ${data.length} points to 2,000 for 30-day chart`);
+      return downsample(data, 2000);
+    }
+    return data;
+  }, [data, timeRange]);
+
   // Map metric to display properties
   const metricConfig = {
     viewers: {
@@ -119,7 +131,7 @@ export function StreamChart({ data, changes = [], metric, timeRange }: StreamCha
   return (
     <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
           <XAxis
             dataKey="timestamp"

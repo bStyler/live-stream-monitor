@@ -1,0 +1,147 @@
+"use client";
+
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Plus, Loader2 } from "lucide-react";
+
+interface AddStreamDialogProps {
+  trigger?: React.ReactNode;
+}
+
+export function AddStreamDialog({ trigger }: AddStreamDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [videoIdOrUrl, setVideoIdOrUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const addStreamMutation = useMutation({
+    mutationFn: async (videoIdOrUrl: string) => {
+      const res = await fetch("/api/streams/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoIdOrUrl }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to add stream");
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      // Invalidate and refetch dashboard stats
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ["dashboard-stats"] });
+      toast.success("Stream added successfully!", {
+        description: "Your stream is now being monitored.",
+      });
+      setOpen(false);
+      setVideoIdOrUrl("");
+      setError(null);
+    },
+    onError: (error: Error) => {
+      // Show warning for duplicate streams instead of error
+      if (error.message.includes("already monitoring")) {
+        toast.warning("Already monitoring", {
+          description: "You're already monitoring this stream.",
+        });
+        setOpen(false);
+        setVideoIdOrUrl("");
+        setError(null);
+      } else {
+        setError(error.message);
+        toast.error("Failed to add stream", {
+          description: error.message,
+        });
+      }
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!videoIdOrUrl.trim()) {
+      setError("Please enter a YouTube video ID or URL");
+      return;
+    }
+
+    addStreamMutation.mutate(videoIdOrUrl.trim());
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Stream
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add YouTube Stream</DialogTitle>
+          <DialogDescription>
+            Enter a YouTube video ID or URL to start monitoring a live stream
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="videoIdOrUrl">YouTube Video ID or URL</Label>
+            <Input
+              id="videoIdOrUrl"
+              type="text"
+              placeholder="e.g., dQw4w9WgXcQ or https://youtube.com/watch?v=..."
+              value={videoIdOrUrl}
+              onChange={(e) => setVideoIdOrUrl(e.target.value)}
+              disabled={addStreamMutation.isPending}
+            />
+            <p className="text-xs text-muted-foreground">
+              Paste a YouTube video URL or just the 11-character video ID
+            </p>
+          </div>
+
+          {error && (
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+              {error}
+            </div>
+          )}
+
+          <div className="flex gap-2 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={addStreamMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={addStreamMutation.isPending}>
+              {addStreamMutation.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              Add Stream
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
