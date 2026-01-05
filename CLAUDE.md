@@ -140,6 +140,164 @@ When multiple independent tasks exist, invoke agents in parallel using a single 
 4. Use Sequential Thinking for complex debugging if issues arise
 5. Consider code-reviewer agent for final review
 
+## Browser Testing Best Practices
+
+**CRITICAL**: Always perform browser testing before marking UI features as complete. Use the Playwright MCP tools for fast, reliable browser automation.
+
+### Pre-Testing Checklist
+
+Before starting browser tests, verify:
+
+1. **Dev server is running on correct port**
+   - Default: `npm run dev` → http://localhost:3000
+   - Check `.env.local` for `NEXT_PUBLIC_APP_URL` value
+   - Ensure no port mismatches between environment variables and actual server
+
+2. **Environment variables are consistent**
+   - Verify `BETTER_AUTH_URL` matches dev server port
+   - Verify `NEXT_PUBLIC_APP_URL` matches dev server port
+   - Common pitfall: Hardcoded ports in code vs environment variables
+
+3. **No stale dev server processes**
+   - If port conflicts occur: `npx kill-port 3000`
+   - Remove lock files if needed: `rm -f .next/dev/lock`
+   - Full restart ensures fresh build: `npm run dev`
+
+### Fast Browser Testing Workflow
+
+Use Playwright MCP tools for browser automation (no .sh files):
+
+```typescript
+// Step 1: Navigate to the page
+browser_navigate("http://localhost:3000/dashboard/streams/xyz")
+
+// Step 2: Resize viewport if needed
+browser_resize(1280, 720) // Desktop
+browser_resize(375, 667)  // Mobile
+
+// Step 3: Take accessibility snapshot (faster than screenshot for verification)
+browser_snapshot()
+
+// Step 4: Take screenshots for visual verification
+browser_take_screenshot({ filename: "feature-test.png" })
+
+// Step 5: Interact with elements
+browser_click({ element: "Add Stream button", ref: "..." })
+browser_type({ element: "Video ID input", ref: "...", text: "dQw4w9WgXcQ" })
+
+// Step 6: Verify console logs
+browser_console_messages({ level: "error" })
+
+// Step 7: Check network requests
+browser_network_requests({ includeStatic: false })
+```
+
+### Common Browser Testing Pitfalls
+
+**1. Port Mismatch Issues**
+- **Symptom**: Auth fails with "net::ERR_CONNECTION_REFUSED"
+- **Cause**: Auth client pointing to wrong port (e.g., 3001 when server runs on 3000)
+- **Fix**:
+  - Check `lib/auth-client.ts` baseURL
+  - Check `.env.local` BETTER_AUTH_URL and NEXT_PUBLIC_APP_URL
+  - Ensure all environment variables use same port
+  - Restart dev server after changes
+
+**2. Cached JavaScript Issues**
+- **Symptom**: Browser uses old code despite file changes
+- **Cause**: Fast Refresh doesn't always catch auth client changes
+- **Fix**:
+  - Full dev server restart: Stop server, `npm run dev`
+  - Hard refresh browser: Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac)
+  - Clear Next.js cache if needed: `rm -rf .next`
+
+**3. Lock File Conflicts**
+- **Symptom**: "Unable to acquire lock at .next/dev/lock"
+- **Cause**: Previous dev server didn't clean up properly
+- **Fix**:
+  - Kill port: `npx kill-port 3000`
+  - Remove lock: `rm -f .next/dev/lock`
+  - Restart: `npm run dev`
+
+**4. Test Credentials Not Working**
+- **Symptom**: Sign-in fails with valid credentials
+- **Cause**: Port mismatch prevents auth verification
+- **Fix**:
+  - Verify auth endpoints are accessible: curl http://localhost:3000/api/auth/session
+  - Check browser Network tab for 404 or connection errors
+  - Ensure Better Auth is configured for correct port
+
+### Browser Testing Performance Tips
+
+1. **Use accessibility snapshots for verification** (faster than screenshots)
+   - `browser_snapshot()` returns full page structure
+   - Can search for text content without visual rendering
+   - Use for element existence checks and state verification
+
+2. **Take screenshots sparingly** (slower, use for visual proof)
+   - Only take screenshots when visual proof is needed
+   - Use targeted element screenshots vs full page when possible
+   - Store screenshots in `.playwright-mcp/` directory
+
+3. **Batch browser interactions** (reduce round trips)
+   - Navigate → Snapshot → Interact → Verify in one flow
+   - Don't alternate between browser and file operations
+
+4. **Pre-verify environment before testing**
+   - Check dev server is running: `curl http://localhost:3000`
+   - Verify environment variables are set correctly
+   - Kill conflicting processes before starting tests
+
+### Test Credentials
+
+For local testing, use these test accounts:
+- **Email**: test@example.com
+- **Password**: testpassword123
+
+These credentials are created during AUTH-001 setup and stored in local database.
+
+### Browser Testing Template
+
+Standard browser testing flow for new features:
+
+```markdown
+1. **Start dev server** (if not running)
+   - `npm run dev` in background
+   - Verify server started on port 3000
+
+2. **Navigate to feature**
+   - Use browser_navigate with full localhost URL
+   - Verify page loads without console errors
+
+3. **Test authentication flow** (if protected route)
+   - Navigate to sign-in page
+   - Fill credentials: test@example.com / testpassword123
+   - Click sign-in button
+   - Verify redirect to dashboard
+
+4. **Test feature functionality**
+   - Use browser_snapshot to verify UI state
+   - Interact with elements (click, type, select)
+   - Take screenshots of key states
+
+5. **Verify data updates**
+   - Check network requests for API calls
+   - Verify console has no errors
+   - Confirm visual updates match expectations
+
+6. **Document results**
+   - Save screenshots to .playwright-mcp/
+   - Note any issues encountered
+   - Update todos.md with verification status
+```
+
+### After Browser Testing
+
+1. **Stop background dev server** if no longer needed
+2. **Clean up screenshots** if temporary (keep proof screenshots)
+3. **Document findings** in commit message or PR description
+4. **Update todos.md** with browser testing verification checkmark
+
 ## Installed Plugins - Proactive Usage
 
 **IMPORTANT**: The following plugins are installed and should be used proactively without waiting for user requests. Automatically invoke them when their use case applies.
