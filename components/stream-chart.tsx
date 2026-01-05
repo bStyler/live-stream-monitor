@@ -155,8 +155,16 @@ export const StreamChart = memo(function StreamChart({
             tickFormatter={(value) => value.toLocaleString()}
             className="text-xs text-gray-600 dark:text-gray-400"
             domain={[
-              (dataMin: number) => Math.floor(dataMin * 0.95),
-              (dataMax: number) => Math.ceil(dataMax * 1.05),
+              (dataMin: number) => {
+                // Ensure minimum padding of 100 or 5% of value
+                const padding = Math.max(Math.abs(dataMin * 0.05), 100);
+                return Math.floor(dataMin - padding);
+              },
+              (dataMax: number) => {
+                // Ensure minimum padding of 100 or 5% of value
+                const padding = Math.max(Math.abs(dataMax * 0.05), 100);
+                return Math.ceil(dataMax + padding);
+              },
             ]}
           />
           <Tooltip content={<CustomTooltip />} />
