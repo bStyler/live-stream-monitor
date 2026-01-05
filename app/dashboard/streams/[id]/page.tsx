@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { use, useState } from 'react';
 import { StreamChart } from '@/components/stream-chart';
+import { DataFreshnessBadge } from '@/components/data-freshness-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,6 +24,7 @@ const TIME_RANGES: { value: TimeRange; label: string }[] = [
 export default function StreamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [activeTab, setActiveTab] = useState('viewers');
+  const [isInteracting, setIsInteracting] = useState(false);
   const { id: streamId } = use(params);
 
   // Fetch stream metadata
@@ -36,14 +38,19 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
   });
 
   // Fetch metrics data
-  const { data: metricsData, isLoading: metricsLoading } = useQuery({
+  const {
+    data: metricsData,
+    isLoading: metricsLoading,
+    dataUpdatedAt,
+    isRefetching
+  } = useQuery({
     queryKey: ['stream-metrics', streamId, timeRange],
     queryFn: async () => {
       const res = await fetch(`/api/streams/${streamId}/metrics?timeRange=${timeRange}`);
       if (!res.ok) throw new Error('Failed to fetch metrics');
       return res.json();
     },
-    refetchInterval: timeRange === 'today' ? 60000 : false,
+    refetchInterval: isInteracting ? false : (timeRange === 'today' ? 60000 : false),
   });
 
   // Fetch changes data
@@ -54,7 +61,7 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
       if (!res.ok) throw new Error('Failed to fetch changes');
       return res.json();
     },
-    refetchInterval: timeRange === 'today' ? 60000 : false,
+    refetchInterval: isInteracting ? false : (timeRange === 'today' ? 60000 : false),
   });
 
   const isLoading = metricsLoading || changesLoading || streamLoading;
@@ -255,10 +262,18 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
               <TabsContent value="viewers" className="mt-4">
                 <Card className="border-blue-500/20">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Eye className="h-5 w-5 text-blue-500" />
-                      Concurrent Viewers
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Eye className="h-5 w-5 text-blue-500" />
+                        Concurrent Viewers
+                      </CardTitle>
+                      {timeRange === 'today' && dataUpdatedAt && (
+                        <DataFreshnessBadge
+                          lastUpdated={new Date(dataUpdatedAt)}
+                          isRefetching={isRefetching}
+                        />
+                      )}
+                    </div>
                     <CardDescription>
                       Real-time viewer count over {TIME_RANGES.find((r) => r.value === timeRange)?.label.toLowerCase()} • {metricsData.dataPoints} data points
                     </CardDescription>
@@ -269,6 +284,8 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
                       changes={changesData?.changes || []}
                       metric="viewers"
                       timeRange={timeRange}
+                      onInteractionStart={() => setIsInteracting(true)}
+                      onInteractionEnd={() => setIsInteracting(false)}
                     />
                   </CardContent>
                 </Card>
@@ -278,10 +295,18 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
               <TabsContent value="likes" className="mt-4">
                 <Card className="border-red-500/20">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Heart className="h-5 w-5 text-red-500" />
-                      Total Likes
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Heart className="h-5 w-5 text-red-500" />
+                        Total Likes
+                      </CardTitle>
+                      {timeRange === 'today' && dataUpdatedAt && (
+                        <DataFreshnessBadge
+                          lastUpdated={new Date(dataUpdatedAt)}
+                          isRefetching={isRefetching}
+                        />
+                      )}
+                    </div>
                     <CardDescription>
                       Cumulative likes over {TIME_RANGES.find((r) => r.value === timeRange)?.label.toLowerCase()} • {metricsData.dataPoints} data points
                     </CardDescription>
@@ -292,6 +317,8 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
                       changes={changesData?.changes || []}
                       metric="likes"
                       timeRange={timeRange}
+                      onInteractionStart={() => setIsInteracting(true)}
+                      onInteractionEnd={() => setIsInteracting(false)}
                     />
                   </CardContent>
                 </Card>
@@ -301,10 +328,18 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
               <TabsContent value="views" className="mt-4">
                 <Card className="border-green-500/20">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <PlayCircle className="h-5 w-5 text-green-500" />
-                      Total Views
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <PlayCircle className="h-5 w-5 text-green-500" />
+                        Total Views
+                      </CardTitle>
+                      {timeRange === 'today' && dataUpdatedAt && (
+                        <DataFreshnessBadge
+                          lastUpdated={new Date(dataUpdatedAt)}
+                          isRefetching={isRefetching}
+                        />
+                      )}
+                    </div>
                     <CardDescription>
                       All-time view count over {TIME_RANGES.find((r) => r.value === timeRange)?.label.toLowerCase()} • {metricsData.dataPoints} data points
                     </CardDescription>
@@ -315,6 +350,8 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
                       changes={changesData?.changes || []}
                       metric="views"
                       timeRange={timeRange}
+                      onInteractionStart={() => setIsInteracting(true)}
+                      onInteractionEnd={() => setIsInteracting(false)}
                     />
                   </CardContent>
                 </Card>

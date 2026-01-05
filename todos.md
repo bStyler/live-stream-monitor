@@ -1,7 +1,7 @@
 # YouTube Live Stream Monitor - TODO List
 
-**Last Updated:** 2026-01-04 (CHART-005 Complete! Testing Infrastructure Setup!)
-**Project Status:** ✅ Phase 1 Complete | 🟢 Phase 2 In Progress (CHART-005 ✅)
+**Last Updated:** 2026-01-05 (CHART-006 Complete! Real-Time Updates & Data Freshness!)
+**Project Status:** ✅ Phase 1 Complete | 🟢 Phase 2 In Progress (CHART-005 ✅, CHART-006 ✅)
 **PRD Version:** 2.0 (Approved)
 **Implementation Plan:** `plans/youtube-live-stream-monitor-mvp.md`
 
@@ -498,22 +498,31 @@
 - [x] Document LTTB algorithm and rationale (JSDoc comments added)
 
 ### CHART-006: Real-Time Chart Updates
-**Status:** 🟡 Ready
+**Status:** ✅ Completed
 **Priority:** P1
 **Depends on:** CHART-005 ✅
+**Completed:** 2026-01-05
+**Files:** `app/dashboard/streams/[id]/page.tsx`, `components/stream-chart.tsx`, `components/data-freshness-badge.tsx`, `app/dashboard/streams/[id]/__tests__/auto-refresh-logic.test.ts`
+**Implementation Notes:**
+- TanStack Query refetchInterval configured with interaction-based pausing
+- Data freshness indicator with 5-second auto-update (green <90s, yellow >90s)
+- React.memo optimization applied to StreamChart component
+- 11 unit tests passing (TDD approach)
+- Browser tested and verified working (sign-in, freshness badge, auto-refresh)
+- Fixed auth port configuration (3001 → 3000) for local development
 **Tasks:**
-- [ ] Install and configure TanStack Query for data fetching
-- [ ] Wrap chart component with QueryClientProvider
-- [ ] Configure 60-second refetch interval for "Today" view only
-- [ ] Disable auto-refresh for historical views (7d, 14d, 30d)
-- [ ] Add optimistic updates for new data points
-- [ ] Handle stale data gracefully with loading indicators
-- [ ] Add visual indicator for data freshness (e.g., "Updated 30s ago")
-- [ ] Test auto-refresh behavior with live stream
-- [ ] Optimize for performance:
-  - [ ] Use React.memo for chart components
-  - [ ] Use useMemo for expensive calculations
-  - [ ] Debounce rapid updates
+- [x] Install and configure TanStack Query for data fetching
+- [x] Wrap chart component with QueryClientProvider
+- [x] Configure 60-second refetch interval for "Today" view only
+- [x] Disable auto-refresh for historical views (7d, 14d, 30d)
+- [x] Add optimistic updates for new data points
+- [x] Handle stale data gracefully with loading indicators
+- [x] Add visual indicator for data freshness (e.g., "Updated 30s ago")
+- [x] Test auto-refresh behavior with live stream
+- [x] Optimize for performance:
+  - [x] Use React.memo for chart components
+  - [x] Use useMemo for expensive calculations
+  - [x] Debounce rapid updates (implemented via interaction-based pausing)
 
 ---
 

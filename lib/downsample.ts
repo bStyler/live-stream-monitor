@@ -3,8 +3,8 @@ import lttb from '@seanvelasco/lttb';
 export interface DataPoint {
   timestamp: string;
   viewers: number | null;
-  likes: number;
-  views: number;
+  likes: number | null;
+  views: number | null;
 }
 
 /**
@@ -39,9 +39,9 @@ export function downsample(
     const downsampledPoints = lttb(lttbInput, targetSize);
 
     // Convert to array if it's not already (handle library variations)
-    const pointsArray = Array.isArray(downsampledPoints)
+    const pointsArray: [number, number][] = (Array.isArray(downsampledPoints)
       ? downsampledPoints
-      : Array.from(downsampledPoints as Iterable<[number, number]>);
+      : Array.from(downsampledPoints as Iterable<[number, number]>)) as [number, number][];
 
     // Map back to original DataPoint format using the x-axis (index) values
     return pointsArray.map(([index]) => data[Math.floor(index)]);

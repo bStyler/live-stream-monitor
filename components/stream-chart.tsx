@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot } from 'recharts';
 import { format } from 'date-fns';
 import { downsample } from '@/lib/downsample';
@@ -25,9 +25,18 @@ interface StreamChartProps {
   changes?: ChangeMarker[];
   metric: 'viewers' | 'likes' | 'views';
   timeRange: 'today' | '7d' | '14d' | '30d';
+  onInteractionStart?: () => void;
+  onInteractionEnd?: () => void;
 }
 
-export function StreamChart({ data, changes = [], metric, timeRange }: StreamChartProps) {
+export const StreamChart = memo(function StreamChart({
+  data,
+  changes = [],
+  metric,
+  timeRange,
+  onInteractionStart,
+  onInteractionEnd
+}: StreamChartProps) {
   // Apply downsampling for 30-day view to improve performance
   // 30 days × 1440 minutes = 43,200 points → downsample to 2,000 points
   const chartData = useMemo(() => {
@@ -129,7 +138,11 @@ export function StreamChart({ data, changes = [], metric, timeRange }: StreamCha
     .filter((m) => m !== null);
 
   return (
-    <div className="w-full h-full">
+    <div
+      className="w-full h-full"
+      onMouseEnter={onInteractionStart}
+      onMouseLeave={onInteractionEnd}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
@@ -168,4 +181,4 @@ export function StreamChart({ data, changes = [], metric, timeRange }: StreamCha
       </ResponsiveContainer>
     </div>
   );
-}
+});
