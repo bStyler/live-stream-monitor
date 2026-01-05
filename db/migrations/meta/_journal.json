@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1767210290412,
+      "tag": "0000_wakeful_doomsday",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1767225283369,
+      "tag": "0001_fixed_lady_mastermind",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767278627847,
+      "tag": "0002_modern_newton_destine",
+      "breakpoints": true
+    }
+  ]
+}

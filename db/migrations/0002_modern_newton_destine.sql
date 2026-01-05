@@ -1,0 +1,1 @@
+ALTER TABLE "stream_metrics" ADD COLUMN "view_count" integer;
