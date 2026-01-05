@@ -1,7 +1,7 @@
 # YouTube Live Stream Monitor - TODO List
 
-**Last Updated:** 2026-01-05 (Phase 2 Complete! All real-time features + Y-axis fix deployed)
-**Project Status:** ✅ Phase 1 Complete | ✅ Phase 2 Complete (CHART-005 ✅, CHART-006 ✅, INFRA-001 ✅)
+**Last Updated:** 2026-01-05 (Phase 2 Complete! Roadmap revised for SaaS features)
+**Project Status:** ✅ Phase 1 Complete | ✅ Phase 2 Complete | 🔵 Phase 3 Planning (Admin System)
 **PRD Version:** 2.0 (Approved)
 **Implementation Plan:** `plans/youtube-live-stream-monitor-mvp.md`
 
@@ -537,7 +537,114 @@
 
 ---
 
-## Phase 3: Alerting System (Weeks 7-8)
+## Revised Roadmap Overview
+
+**Current Status:** Phase 2 Complete ✅
+
+**Upcoming Phases:**
+- **Phase 3:** Admin System & User Management (Foundation for multi-tenancy)
+- **Phase 4:** Workspaces & Multi-Tenancy (Collaboration layer)
+- **Phase 5:** Production Domain & Performance (Production readiness)
+- **Phase 6:** Alerting System (Email notifications)
+- **Phase 7:** Dashboard Enhancements & Polish (Advanced features & launch)
+
+---
+
+## Phase 3: Admin System & User Management
+
+**Status:** 🔵 Planned
+**Priority:** P0 (Foundation for future phases)
+**Goal:** Build admin capabilities for user management, role-based access, and stream quota allocation
+
+**Overview:**
+Enable administrators to manage users, allocate live stream monitoring slots, invite new users, and impersonate users for support purposes. This phase lays the foundation for the multi-tenancy and workspace features in Phase 4.
+
+**Key Features:**
+1. Admin role system with protected routes
+2. Admin dashboard for user management
+3. User CRUD operations (create, read, update, delete)
+4. Stream quota system (per-user slot allocation)
+5. User invitation system via email
+6. Admin user impersonation for support
+
+**Plan Document:** `plans/phase-3-admin-system.md` (in progress)
+
+**Tasks:**
+- [ ] Review and approve Phase 3 implementation plan
+- [ ] Create database migrations for admin schema
+- [ ] Implement admin middleware and role checks
+- [ ] Build admin dashboard UI
+- [ ] Create user management API endpoints
+- [ ] Implement invitation system
+- [ ] Build user impersonation functionality
+- [ ] Add comprehensive tests
+- [ ] Security audit and review
+
+---
+
+## Phase 4: Workspaces & Multi-Tenancy
+
+**Status:** 🔴 Blocked
+**Priority:** P0
+**Depends on:** Phase 3 (Admin System)
+**Goal:** Enable workspace-based collaboration with role-based permissions
+
+**Overview:**
+Implement workspace concept where each user gets a workspace on signup and becomes the primary owner. Owners can invite sub-users with specific roles (editor, reader) for collaborative stream monitoring.
+
+**Key Features:**
+1. Workspace model and schema
+2. Workspace creation on user signup
+3. Primary owner role
+4. Sub-user invitations
+5. Role-based access control (owner/editor/reader)
+6. Workspace-scoped data isolation
+7. Workspace settings & preferences
+
+**Tasks:**
+- [ ] Design workspace schema and relationships
+- [ ] Implement workspace creation on signup
+- [ ] Build workspace invitation system
+- [ ] Create role-based permission middleware
+- [ ] Add workspace switcher UI
+- [ ] Implement workspace-scoped queries
+- [ ] Add workspace settings page
+- [ ] Migration path for existing users
+
+---
+
+## Phase 5: Production Domain & Performance
+
+**Status:** 🔴 Blocked
+**Priority:** P0
+**Depends on:** Phase 3 & 4 (Core features complete)
+**Goal:** Production-ready deployment with custom domain and performance monitoring
+
+**Overview:**
+Deploy to a custom domain with comprehensive performance monitoring, optimization, and production-grade infrastructure.
+
+**Key Features:**
+1. Custom domain setup & DNS configuration
+2. Performance monitoring (Vercel Analytics, Sentry)
+3. Performance optimization & profiling
+4. SEO & metadata configuration
+5. Production environment variables
+6. Monitoring dashboards
+
+**Tasks:**
+- [ ] Purchase and configure custom domain
+- [ ] Set up DNS and SSL certificates
+- [ ] Configure Vercel production settings
+- [ ] Implement performance monitoring (Sentry, Vercel Analytics)
+- [ ] Performance audit and optimization
+- [ ] SEO optimization (metadata, sitemap, robots.txt)
+- [ ] Set up error tracking and alerting
+- [ ] Load testing and capacity planning
+- [ ] Documentation for production deployment
+
+---
+
+## Phase 6: Alerting System (Weeks 7-8)
 
 ### EMAIL-001: Resend Email Integration
 **Status:** 🔴 Blocked
@@ -634,7 +741,7 @@
 
 ---
 
-## Phase 4: Polish & Launch (Week 9)
+## Phase 7: Dashboard Enhancements & Polish
 
 ### POLISH-001: UI/UX Refinements
 **Status:** 🔴 Blocked
