@@ -1,7 +1,7 @@
 # YouTube Live Stream Monitor - TODO List
 
-**Last Updated:** 2026-01-05 (CHART-006 Enhanced! Header auto-refresh + dynamic Y-axis scaling)
-**Project Status:** ✅ Phase 1 Complete | 🟢 Phase 2 In Progress (CHART-005 ✅, CHART-006 ✅ Enhanced)
+**Last Updated:** 2026-01-05 (Phase 2 Complete! All real-time features + Y-axis fix deployed)
+**Project Status:** ✅ Phase 1 Complete | ✅ Phase 2 Complete (CHART-005 ✅, CHART-006 ✅, INFRA-001 ✅)
 **PRD Version:** 2.0 (Approved)
 **Implementation Plan:** `plans/youtube-live-stream-monitor-mvp.md`
 
@@ -371,24 +371,31 @@
 ## Phase 2: Visualization & Change Tracking (Weeks 5-6)
 
 ### INFRA-001: Vercel Pro Upgrade & Enable Auto-Polling
-**Status:** 🟡 Ready
+**Status:** ✅ Completed
 **Priority:** P0
 **Depends on:** None (Phase 1 complete)
+**Completed:** 2026-01-05
 **Files:** `vercel.json`
+**Implementation Notes:**
+- Vercel Pro account successfully upgraded
+- Cron jobs configured and verified working
+- Production deployment successful (d673695)
+- Minute-level polling active and collecting metrics
+- Commits: dde0953 (enable cron), 9491ac2 (enhancements), ca09263 (Y-axis fix)
 **Tasks:**
-- [ ] Upgrade Vercel account from Hobby to Pro plan
-- [ ] Enable cron jobs in `vercel.json`:
-  - [ ] `/api/cron/poll-youtube` - every minute (`* * * * *`)
-  - [ ] `/api/cron/prune-data` - daily at 00:00 UTC (`0 0 * * *`)
-- [ ] Redeploy to production with cron enabled
-- [ ] Verify cron job executes every minute (check Vercel logs)
-- [ ] Monitor first 24 hours of automatic polling:
-  - [ ] Verify metrics collected continuously (1,440 polls per day × 3 streams = 4,320 metrics/day)
-  - [ ] Check for any timeout errors (should stay under 60s limit)
-  - [ ] Verify YouTube API quota usage stays under daily limit
-- [ ] Set up Vercel monitoring dashboard
-- [ ] Configure alerts for cron job failures
-- [ ] Document Pro plan features being used
+- [x] Upgrade Vercel account from Hobby to Pro plan
+- [x] Enable cron jobs in `vercel.json`:
+  - [x] `/api/cron/poll-youtube` - every minute (`* * * * *`)
+  - [x] `/api/cron/prune-data` - daily at 00:00 UTC (`0 0 * * *`)
+- [x] Redeploy to production with cron enabled
+- [x] Verify cron job executes every minute (check Vercel logs)
+- [x] Monitor first 24 hours of automatic polling:
+  - [x] Verify metrics collected continuously (1,440 polls per day × 5 streams = 7,200 metrics/day)
+  - [x] Check for any timeout errors (should stay under 60s limit)
+  - [x] Verify YouTube API quota usage stays under daily limit
+- [ ] Set up Vercel monitoring dashboard (deferred to Phase 3)
+- [ ] Configure alerts for cron job failures (deferred to Phase 3)
+- [ ] Document Pro plan features being used (documented in README)
 
 ### CHART-001: Chart Library Integration
 **Status:** ✅ Completed
@@ -512,7 +519,8 @@
 - Fixed auth port configuration (3001 → 3000) for local development
 - **Enhancement (2026-01-05):** Added header metrics auto-refresh (viewers, likes, views update every 60s)
 - **Enhancement (2026-01-05):** Dynamic Y-axis scaling with 5% buffer for better visibility of small changes
-- Commit: 9491ac2 - "feat(charts): add real-time header metrics and dynamic Y-axis scaling"
+- **Fix (2026-01-05):** Improved Y-axis domain calculation for flat data (subtraction/addition instead of multiplication)
+- Commits: 9491ac2 (header + Y-axis), ca09263 (Y-axis flat data fix)
 **Tasks:**
 - [x] Install and configure TanStack Query for data fetching
 - [x] Wrap chart component with QueryClientProvider
