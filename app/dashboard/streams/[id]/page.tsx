@@ -35,6 +35,7 @@ export default function StreamDetailPage({ params }: { params: Promise<{ id: str
       if (!res.ok) throw new Error('Failed to fetch stream');
       return res.json();
     },
+    refetchInterval: isInteracting ? false : (timeRange === 'today' ? 60000 : false),
   });
 
   // Fetch metrics data

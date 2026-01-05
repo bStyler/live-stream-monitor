@@ -154,6 +154,10 @@ export const StreamChart = memo(function StreamChart({
           <YAxis
             tickFormatter={(value) => value.toLocaleString()}
             className="text-xs text-gray-600 dark:text-gray-400"
+            domain={[
+              (dataMin: number) => Math.floor(dataMin * 0.95),
+              (dataMax: number) => Math.ceil(dataMax * 1.05),
+            ]}
           />
           <Tooltip content={<CustomTooltip />} />
           <Line
