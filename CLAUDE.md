@@ -90,6 +90,7 @@ When adding UI components, use shadcn/ui CLI or manually add to `components/ui/`
 - **Check for specialists**: Review available agents/skills that match the task domain
 - **Enable parallelization**: Tasks that can run independently should use separate agents in parallel
 - **Minimize conflicts**: Different agents working on different areas reduce merge conflicts and context switching
+- **Use AskUserQuestion during planning**: When executing plans or features, use the AskUserQuestion tool proactively during the planning phase to gather missing context, clarify ambiguities, or confirm assumptions. This enables more autonomous execution by resolving uncertainties early rather than making incorrect assumptions.
 
 ### Common Scenarios
 - **UI/Component work**: Consider frontend-developer or nextjs-app-router-developer agents
