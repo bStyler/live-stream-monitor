@@ -21,6 +21,33 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: false, // Disable for MVP (no email service yet)
   },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "user",
+        input: false, // Don't allow user to set role during signup
+      },
+      streamQuota: {
+        type: "number",
+        required: false,
+        defaultValue: 5,
+        input: false,
+      },
+      isActive: {
+        type: "boolean",
+        required: false,
+        defaultValue: true,
+        input: false,
+      },
+      lastLoginAt: {
+        type: "date",
+        required: false,
+        input: false,
+      },
+    },
+  },
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL!,
 });
