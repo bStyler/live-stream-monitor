@@ -11,16 +11,18 @@ import { eq, and, sql, desc } from 'drizzle-orm';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
+
+    const { id } = await params;
 
     // Get user details
     const [userDetail] = await db
       .select()
       .from(user)
-      .where(eq(user.id, params.id))
+      .where(eq(user.id, id))
       .limit(1);
 
     if (!userDetail) {
@@ -50,7 +52,7 @@ export async function GET(
       .innerJoin(streams, eq(userStreams.streamId, streams.id))
       .where(
         and(
-          eq(userStreams.userId, params.id),
+          eq(userStreams.userId, id),
           sql`${userStreams.deletedAt} IS NULL`,
           sql`${streams.deletedAt} IS NULL`
         )

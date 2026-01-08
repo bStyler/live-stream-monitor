@@ -13,11 +13,12 @@ import { eq } from 'drizzle-orm';
 // PATCH - Update user
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
 
+    const { id } = await params;
     const body = await req.json();
     const { name, email, role, streamQuota, isActive } = body;
 
@@ -33,7 +34,7 @@ export async function PATCH(
     await db
       .update(user)
       .set(updateData)
-      .where(eq(user.id, params.id));
+      .where(eq(user.id, id));
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -48,16 +49,18 @@ export async function PATCH(
 // DELETE - Soft delete user (mark as inactive)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
+
+    const { id } = await params;
 
     // Soft delete: mark as inactive
     await db
       .update(user)
       .set({ isActive: false })
-      .where(eq(user.id, params.id));
+      .where(eq(user.id, id));
 
     return NextResponse.json({ success: true });
   } catch (error) {
