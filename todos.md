@@ -1,7 +1,7 @@
 # YouTube Live Stream Monitor - TODO List
 
-**Last Updated:** 2026-01-05 (Phase 2 Complete! Roadmap revised for SaaS features)
-**Project Status:** ✅ Phase 1 Complete | ✅ Phase 2 Complete | 🔵 Phase 3 Planning (Admin System)
+**Last Updated:** 2026-01-08 (Phase 3 Core Complete! Admin system foundation implemented)
+**Project Status:** ✅ Phase 1 Complete | ✅ Phase 2 Complete | ✅ Phase 3 Core Complete | 🔵 Phase 3 Enhancements
 **PRD Version:** 2.0 (Approved)
 **Implementation Plan:** `plans/youtube-live-stream-monitor-mvp.md`
 
@@ -552,33 +552,201 @@
 
 ## Phase 3: Admin System & User Management
 
-**Status:** 🔵 Planned
+**Status:** ✅ Core Complete | 🔵 Enhancements In Progress
 **Priority:** P0 (Foundation for future phases)
 **Goal:** Build admin capabilities for user management, role-based access, and stream quota allocation
 
 **Overview:**
 Enable administrators to manage users, allocate live stream monitoring slots, invite new users, and impersonate users for support purposes. This phase lays the foundation for the multi-tenancy and workspace features in Phase 4.
 
-**Key Features:**
-1. Admin role system with protected routes
-2. Admin dashboard for user management
-3. User CRUD operations (create, read, update, delete)
-4. Stream quota system (per-user slot allocation)
-5. User invitation system via email
-6. Admin user impersonation for support
+**Plan Document:** `plans/phase-3-admin-system.md`
 
-**Plan Document:** `plans/phase-3-admin-system.md` (in progress)
-
+### ADMIN-001: Admin System Foundation (Phase 1)
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** AUTH-001, DB-001
+**Completed:** 2026-01-08
+**Commit:** 1b3556f
+**Files:** `db/schema.ts`, `lib/admin-middleware.ts`, `scripts/create-admin-user.ts`, `scripts/apply-admin-migration.ts`
 **Tasks:**
-- [ ] Review and approve Phase 3 implementation plan
-- [ ] Create database migrations for admin schema
-- [ ] Implement admin middleware and role checks
-- [ ] Build admin dashboard UI
-- [ ] Create user management API endpoints
-- [ ] Implement invitation system
-- [ ] Build user impersonation functionality
-- [ ] Add comprehensive tests
-- [ ] Security audit and review
+- [x] Add admin fields to user table (role, streamQuota, isActive, lastLoginAt)
+- [x] Create database migration script
+- [x] Apply migration to production database
+- [x] Create admin middleware (requireAdmin, checkAdmin)
+- [x] Create admin user promotion script
+- [x] Test admin promotion workflow
+- [x] Verify admin middleware protects routes
+
+### ADMIN-002: Admin Dashboard UI (Phase 2)
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** ADMIN-001
+**Completed:** 2026-01-08
+**Commit:** 796d762
+**Files:** `app/admin/layout.tsx`, `app/admin/page.tsx`, `app/admin/users/page.tsx`, `app/api/admin/users/route.ts`
+**Tasks:**
+- [x] Create admin layout with navigation sidebar
+- [x] Build admin overview dashboard with stats (total users, admins, active, quota)
+- [x] Create users list page with search and filters
+- [x] Implement pagination (20 users per page)
+- [x] Add stream count to user list
+- [x] Create users API endpoint with query filters
+- [x] Add Admin Panel link to dashboard for admin users
+- [x] Test admin dashboard access and navigation
+
+### ADMIN-003: User Management CRUD Operations
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** ADMIN-002
+**Completed:** 2026-01-08
+**Commit:** 67f5a1b
+**Files:** `app/admin/users/page.tsx`, `app/api/admin/users/[id]/route.ts`
+**Tasks:**
+- [x] Add Actions dropdown menu to users table
+- [x] Implement Edit User dialog with form fields (name, email, role, quota, status)
+- [x] Create PATCH endpoint for user updates
+- [x] Create DELETE endpoint for soft delete (mark inactive)
+- [x] Add View Details navigation
+- [x] Handle loading and error states
+- [x] Test edit, delete, view functionality
+- [x] Browser test complete workflow
+
+### ADMIN-004: Activity Log Page
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** ADMIN-002
+**Completed:** 2026-01-08
+**Commit:** f84e502
+**Files:** `app/admin/activity/page.tsx`
+**Tasks:**
+- [x] Create activity log page with table layout
+- [x] Add activity type filter dropdown
+- [x] Implement color-coded badges and icons
+- [x] Create activity log data structure
+- [x] Add mock data for UI demonstration
+- [x] Display: Type, Actor, Target, Description, Timestamp
+- [x] Add info card explaining activity logging
+- [x] Browser test activity log page
+
+### ADMIN-005: User Detail Page
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** ADMIN-003
+**Completed:** 2026-01-08
+**Files:** `app/admin/users/[id]/page.tsx`, `app/api/admin/users/[id]/detail/route.ts`
+**Tasks:**
+- [x] Create user detail page with comprehensive info
+- [x] Add API endpoint for user details with streams
+- [x] Display user profile information (name, email, role, status, dates)
+- [x] Show stream usage stats (total, live, remaining)
+- [x] List monitored streams with thumbnails and metrics
+- [x] Add recent activity section (ready for backend)
+- [x] Implement back navigation to users list
+- [x] Add Edit User button
+
+### ADMIN-006: Activity Log Backend Integration
+**Status:** 🟡 Ready
+**Priority:** P1
+**Depends on:** ADMIN-004
+**Tasks:**
+- [ ] Design activity log database schema (activityLogs table)
+- [ ] Create database migration for activity logs
+- [ ] Implement activity logging service (`lib/activity-logger.ts`)
+- [ ] Add logging hooks to user CRUD operations
+- [ ] Add logging for role changes
+- [ ] Add logging for user logins
+- [ ] Add logging for admin actions
+- [ ] Create API endpoint: GET /api/admin/activity
+- [ ] Update activity page to fetch real data
+- [ ] Test activity log capture and display
+
+### ADMIN-007: Activity Log Export
+**Status:** 🟡 Ready
+**Priority:** P1
+**Depends on:** ADMIN-006
+**Tasks:**
+- [ ] Create CSV export endpoint: GET /api/admin/activity/export
+- [ ] Implement CSV formatting (headers, data rows)
+- [ ] Add date range filter for exports
+- [ ] Add export button to activity log page
+- [ ] Handle large datasets (streaming response)
+- [ ] Test CSV download and formatting
+- [ ] Add export audit logging
+
+### ADMIN-008: User Invitation System
+**Status:** 🟡 Ready
+**Priority:** P1
+**Depends on:** ADMIN-002, SETUP-004 (Resend)
+**Tasks:**
+- [ ] Create invitations table in database (already in schema)
+- [ ] Create invitation generation API: POST /api/admin/invitations
+- [ ] Implement invitation email template
+- [ ] Create invitation acceptance page: /invitations/[token]
+- [ ] Add invitation management UI to admin panel
+- [ ] Track invitation status (pending, accepted, expired)
+- [ ] Set 7-day expiration for invitations
+- [ ] Test complete invitation flow
+- [ ] Add invitation link to admin dashboard
+
+### ADMIN-009: Advanced Activity Filtering
+**Status:** 🔴 Blocked
+**Priority:** P2
+**Depends on:** ADMIN-006
+**Tasks:**
+- [ ] Add date range picker to activity log page
+- [ ] Implement date range filter in API
+- [ ] Add actor filter (filter by admin user)
+- [ ] Add target user filter
+- [ ] Add multi-select for activity types
+- [ ] Implement combined filter logic
+- [ ] Add filter reset button
+- [ ] Test complex filter combinations
+- [ ] Add filter state to URL params
+
+### ADMIN-010: Activity Log Retention Policies
+**Status:** 🔴 Blocked
+**Priority:** P2
+**Depends on:** ADMIN-006
+**Tasks:**
+- [ ] Design 90-day retention policy
+- [ ] Create data pruning cron job
+- [ ] Add retention policy to prune-data endpoint
+- [ ] Implement archive functionality (optional)
+- [ ] Add retention settings to admin config
+- [ ] Create audit log for deleted activity records
+- [ ] Test automatic pruning
+- [ ] Document retention policy
+
+### ADMIN-011: Email Notifications for Admin Actions
+**Status:** 🔴 Blocked
+**Priority:** P2
+**Depends on:** ADMIN-006, SETUP-004 (Resend)
+**Tasks:**
+- [ ] Design notification trigger rules
+- [ ] Create admin notification email template
+- [ ] Implement notification for user deletions
+- [ ] Implement notification for role changes
+- [ ] Implement notification for quota changes
+- [ ] Add notification settings to admin config
+- [ ] Create admin email digest (daily summary)
+- [ ] Test email delivery
+- [ ] Add unsubscribe option
+
+### ADMIN-012: User Impersonation System
+**Status:** 🔴 Blocked
+**Priority:** P3 (Future Enhancement)
+**Depends on:** ADMIN-002, AUTH-001
+**Tasks:**
+- [ ] Design impersonation session schema
+- [ ] Create impersonationLogs table migration (already in schema)
+- [ ] Implement impersonation start API: POST /api/admin/impersonate
+- [ ] Implement impersonation end API: POST /api/admin/end-impersonation
+- [ ] Add impersonation banner to UI (show "Viewing as [User]")
+- [ ] Add "Stop Impersonation" button
+- [ ] Log all impersonation sessions
+- [ ] Restrict impersonation to non-admin users
+- [ ] Add audit trail for impersonated actions
+- [ ] Test impersonation flow and security
 
 ---
 
