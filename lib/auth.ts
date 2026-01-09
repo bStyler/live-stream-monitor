@@ -46,7 +46,7 @@ export const auth = betterAuth({
       streamQuota: {
         type: "number",
         required: false,
-        defaultValue: 5,
+        defaultValue: 1, // Trial: 1 slot, will be upgraded via billing
         input: false,
       },
       isActive: {

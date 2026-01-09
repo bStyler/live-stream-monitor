@@ -34,23 +34,25 @@ export default function AdminActivityPage() {
   const [filter, setFilter] = useState<string>('');
 
   useEffect(() => {
-    // TODO: Fetch from API endpoint when implemented
-    // For now, showing mock data structure
-    setLoading(false);
-
-    // Mock data to show the UI
-    setActivities([
-      {
-        id: '1',
-        type: 'user_edit',
-        adminName: 'Eliran',
-        targetUserName: 'Test User',
-        targetUserEmail: 'test@example.com',
-        description: 'Updated user role from user to admin',
-        timestamp: new Date().toISOString(),
-      },
-    ]);
+    fetchActivities();
   }, [filter]);
+
+  const fetchActivities = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filter) params.append('filter', filter);
+
+      const response = await fetch(`/api/admin/activity?${params}`);
+      const data = await response.json();
+
+      setActivities(data.activities || []);
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getActivityIcon = (type: ActivityLog['type']) => {
     switch (type) {
