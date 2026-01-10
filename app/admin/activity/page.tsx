@@ -32,16 +32,24 @@ export default function AdminActivityPage() {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [actor, setActor] = useState<string>('');
+  const [target, setTarget] = useState<string>('');
 
   useEffect(() => {
     fetchActivities();
-  }, [filter]);
+  }, [filter, startDate, endDate, actor, target]);
 
   const fetchActivities = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (filter) params.append('filter', filter);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (actor) params.append('actor', actor);
+      if (target) params.append('target', target);
 
       const response = await fetch(`/api/admin/activity?${params}`);
       const data = await response.json();
@@ -52,6 +60,14 @@ export default function AdminActivityPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResetFilters = () => {
+    setFilter('');
+    setStartDate('');
+    setEndDate('');
+    setActor('');
+    setTarget('');
   };
 
   const getActivityIcon = (type: ActivityLog['type']) => {
@@ -98,20 +114,86 @@ export default function AdminActivityPage() {
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-4 flex-wrap">
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="px-3 py-2 border rounded-md bg-background"
-        >
-          <option value="">All Activities</option>
-          <option value="user_edit">User Edits</option>
-          <option value="user_delete">User Deletions</option>
-          <option value="role_change">Role Changes</option>
-          <option value="login">User Logins</option>
-          <option value="signup">User Signups</option>
-        </select>
+      {/* Advanced Filters */}
+      <div className="space-y-4">
+        <div className="flex gap-4 flex-wrap items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="text-sm font-medium mb-2 block">Activity Type</label>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md bg-background"
+            >
+              <option value="">All Activities</option>
+              <option value="user_edit">User Edits</option>
+              <option value="user_delete">User Deletions</option>
+              <option value="role_change">Role Changes</option>
+              <option value="login">User Logins</option>
+              <option value="signup">User Signups</option>
+            </select>
+          </div>
+
+          <div className="flex-1 min-w-[150px]">
+            <label className="text-sm font-medium mb-2 block">Start Date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md bg-background"
+            />
+          </div>
+
+          <div className="flex-1 min-w-[150px]">
+            <label className="text-sm font-medium mb-2 block">End Date</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md bg-background"
+            />
+          </div>
+
+          <div className="flex-1 min-w-[150px]">
+            <label className="text-sm font-medium mb-2 block">Actor (Admin)</label>
+            <input
+              type="text"
+              value={actor}
+              onChange={(e) => setActor(e.target.value)}
+              placeholder="Search by admin name..."
+              className="w-full px-3 py-2 border rounded-md bg-background"
+            />
+          </div>
+
+          <div className="flex-1 min-w-[150px]">
+            <label className="text-sm font-medium mb-2 block">Target User</label>
+            <input
+              type="text"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              placeholder="Search by user name..."
+              className="w-full px-3 py-2 border rounded-md bg-background"
+            />
+          </div>
+
+          <button
+            onClick={handleResetFilters}
+            className="px-4 py-2 border rounded-md hover:bg-muted transition-colors"
+          >
+            Reset Filters
+          </button>
+        </div>
+
+        {(filter || startDate || endDate || actor || target) && (
+          <div className="text-sm text-muted-foreground">
+            Active filters: {[
+              filter && `Type: ${filter}`,
+              startDate && `From: ${startDate}`,
+              endDate && `To: ${endDate}`,
+              actor && `Actor: ${actor}`,
+              target && `Target: ${target}`,
+            ].filter(Boolean).join(', ')}
+          </div>
+        )}
       </div>
 
       {/* Activity Log Table */}

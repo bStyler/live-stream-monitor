@@ -16,32 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, ChevronLeft, ChevronRight, Edit, Trash2, Eye, MoreHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { Search, ChevronLeft, ChevronRight, User as UserIcon } from 'lucide-react';
 
 interface User {
   id: string;
@@ -78,8 +53,6 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState<string>('');
   const [activeFilter, setActiveFilter] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -129,61 +102,35 @@ export default function AdminUsersPage() {
     return new Date(date).toLocaleDateString();
   };
 
-  const handleViewUser = (userId: string) => {
-    // Navigate to user detail page
-    window.location.href = `/admin/users/${userId}`;
-  };
+  const handleImpersonate = async (user: User) => {
+    if (user.role === 'admin') {
+      alert('Cannot impersonate another admin');
+      return;
+    }
 
-  const handleEditUser = (user: User) => {
-    setEditingUser(user);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This will mark them as inactive.')) {
+    if (!confirm(`Start impersonating ${user.name}? You will be viewing the app as this user.`)) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
+      const response = await fetch('/api/admin/impersonate/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUserId: user.id }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete user');
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Now impersonating ${user.name}. The page will reload.`);
+        // Reload to update session context
+        window.location.reload();
+      } else {
+        alert(data.error || 'Failed to start impersonation');
       }
-
-      // Refresh the users list
-      fetchUsers();
     } catch (error) {
-      console.error('Error deleting user:', error);
-      alert('Failed to delete user. Please try again.');
-    }
-  };
-
-  const handleSaveUser = async (updatedUser: Partial<User>) => {
-    if (!editingUser) return;
-
-    try {
-      const response = await fetch(`/api/admin/users/${editingUser.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedUser),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update user');
-      }
-
-      // Refresh the users list and close dialog
-      fetchUsers();
-      setIsEditDialogOpen(false);
-      setEditingUser(null);
-    } catch (error) {
-      console.error('Error updating user:', error);
-      alert('Failed to update user. Please try again.');
+      console.error('Failed to start impersonation:', error);
+      alert('Failed to start impersonation');
     }
   };
 
@@ -255,7 +202,7 @@ export default function AdminUsersPage() {
                   <TableHead>Status</TableHead>
                   <TableHead>Last Login</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -282,35 +229,17 @@ export default function AdminUsersPage() {
                     <TableCell className="text-muted-foreground">
                       {formatDate(user.createdAt)}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleViewUser(user.id)}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit User
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDeleteUser(user.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete User
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <TableCell>
+                      {user.role !== 'admin' && (
+                        <button
+                          onClick={() => handleImpersonate(user)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md hover:bg-muted transition-colors"
+                          title={`Impersonate ${user.name}`}
+                        >
+                          <UserIcon className="h-4 w-4" />
+                          Impersonate
+                        </button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -349,102 +278,6 @@ export default function AdminUsersPage() {
           </>
         )}
       </div>
-
-      {/* Edit User Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>
-              Update user information and permissions
-            </DialogDescription>
-          </DialogHeader>
-          {editingUser && (
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={editingUser.name}
-                  onChange={(e) =>
-                    setEditingUser({ ...editingUser, name: e.target.value })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={editingUser.email}
-                  onChange={(e) =>
-                    setEditingUser({ ...editingUser, email: e.target.value })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="role">Role</Label>
-                <Select
-                  value={editingUser.role}
-                  onValueChange={(value) =>
-                    setEditingUser({ ...editingUser, role: value as 'user' | 'admin' })
-                  }
-                >
-                  <SelectTrigger id="role">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="streamQuota">Stream Quota</Label>
-                <Input
-                  id="streamQuota"
-                  type="number"
-                  value={editingUser.streamQuota}
-                  onChange={(e) =>
-                    setEditingUser({
-                      ...editingUser,
-                      streamQuota: parseInt(e.target.value),
-                    })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="isActive">Status</Label>
-                <Select
-                  value={editingUser.isActive ? 'active' : 'inactive'}
-                  onValueChange={(value) =>
-                    setEditingUser({
-                      ...editingUser,
-                      isActive: value === 'active',
-                    })
-                  }
-                >
-                  <SelectTrigger id="isActive">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => handleSaveUser(editingUser!)}>
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
