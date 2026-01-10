@@ -99,6 +99,21 @@
 - [x] Update package.json with exact versions
 - [x] Test dev server starts: `npm run dev`
 
+### SETUP-006: Cleanup Dropbox Development Folder
+**Status:** 🟡 Ready
+**Priority:** P3
+**Depends on:** None (Can do once C:\Dev is validated)
+**Tasks:**
+- [ ] Verify C:\Dev\live-stream-monitor builds successfully (`npm run build`)
+- [ ] Verify dev server runs without errors (`npm run dev`)
+- [ ] Test authentication flow (sign-in, sign-up, sign-out)
+- [ ] Test admin panel access and functionality
+- [ ] Verify all Phase 3 features work in C:\Dev version
+- [ ] Once validated, delete Dropbox development folder:
+  - Delete: `D:\Dropbox (Personal)\AI Vibe Coding\live-stream-monitor`
+- [ ] Update any local paths/bookmarks to point to C:\Dev\live-stream-monitor
+- [ ] Document migration in changelog or README
+
 ---
 
 ## Phase 1: Core Monitoring & Authentication (Weeks 1-4)
@@ -662,10 +677,11 @@ Enable administrators to manage users, allocate live stream monitoring slots, in
 - [x] Update activity page to fetch real data
 - [x] Test activity log capture and display
 
-### ADMIN-007: Activity Log Export
-**Status:** 🟡 Ready
-**Priority:** P1
+### ADMIN-007: Activity Log Export (Moved to Phase 5)
+**Status:** ⏸️ Deferred
+**Priority:** P2
 **Depends on:** ADMIN-006
+**Moved to:** Phase 5 - User Experience Enhancements
 **Tasks:**
 - [ ] Create CSV export endpoint: GET /api/admin/activity/export
 - [ ] Implement CSV formatting (headers, data rows)
@@ -675,10 +691,11 @@ Enable administrators to manage users, allocate live stream monitoring slots, in
 - [ ] Test CSV download and formatting
 - [ ] Add export audit logging
 
-### ADMIN-008: User Invitation System
-**Status:** 🟡 Ready
-**Priority:** P1
+### ADMIN-008: User Invitation System (Moved to Phase 5)
+**Status:** ⏸️ Deferred
+**Priority:** P2
 **Depends on:** ADMIN-002, SETUP-004 (Resend)
+**Moved to:** Phase 5 - User Experience Enhancements
 **Tasks:**
 - [ ] Create invitations table in database (already in schema)
 - [ ] Create invitation generation API: POST /api/admin/invitations
@@ -722,10 +739,11 @@ Enable administrators to manage users, allocate live stream monitoring slots, in
 - [x] Test pruning logic with different cutoff dates
 - [x] Document retention policy in UI
 
-### ADMIN-011: Email Notifications for Admin Actions
-**Status:** 🔴 Blocked
+### ADMIN-011: Email Notifications for Admin Actions (Moved to Phase 5)
+**Status:** ⏸️ Deferred
 **Priority:** P2
 **Depends on:** ADMIN-006, SETUP-004 (Resend)
+**Moved to:** Phase 5 - User Experience Enhancements
 **Tasks:**
 - [ ] Design notification trigger rules
 - [ ] Create admin notification email template
@@ -790,15 +808,64 @@ Implement workspace concept where each user gets a workspace on signup and becom
 
 ---
 
-## Phase 5: Production Domain & Performance
+## Phase 5: User Experience Enhancements & Production
 
 **Status:** 🔴 Blocked
-**Priority:** P0
+**Priority:** P1
 **Depends on:** Phase 3 & 4 (Core features complete)
-**Goal:** Production-ready deployment with custom domain and performance monitoring
+**Goal:** Polish user experience with deferred admin features and production-ready deployment
 
 **Overview:**
-Deploy to a custom domain with comprehensive performance monitoring, optimization, and production-grade infrastructure.
+Complete deferred Phase 3 admin features (activity log export, user invitations, email notifications) and deploy to production with custom domain and monitoring.
+
+### UX-001: Activity Log Export (from ADMIN-007)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-006
+**Tasks:**
+- [ ] Create CSV export endpoint: GET /api/admin/activity/export
+- [ ] Implement CSV formatting (headers, data rows)
+- [ ] Add date range filter for exports
+- [ ] Add export button to activity log page
+- [ ] Handle large datasets (streaming response)
+- [ ] Test CSV download and formatting
+- [ ] Add export audit logging
+
+### UX-002: User Invitation System (from ADMIN-008)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-002, SETUP-004 (Resend)
+**Tasks:**
+- [ ] Create invitations table in database (already in schema)
+- [ ] Create invitation generation API: POST /api/admin/invitations
+- [ ] Implement invitation email template
+- [ ] Create invitation acceptance page: /invitations/[token]
+- [ ] Add invitation management UI to admin panel
+- [ ] Track invitation status (pending, accepted, expired)
+- [ ] Set 7-day expiration for invitations
+- [ ] Test complete invitation flow
+- [ ] Add invitation link to admin dashboard
+
+### UX-003: Email Notifications for Admin Actions (from ADMIN-011)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-006, SETUP-004 (Resend)
+**Tasks:**
+- [ ] Design notification trigger rules
+- [ ] Create admin notification email template
+- [ ] Implement notification for user deletions
+- [ ] Implement notification for role changes
+- [ ] Implement notification for quota changes
+- [ ] Add notification settings to admin config
+- [ ] Create admin email digest (daily summary)
+- [ ] Test email delivery
+- [ ] Add unsubscribe option
+
+### PROD-001: Production Domain & Performance
+**Status:** 🔴 Blocked
+**Priority:** P0
+**Depends on:** Phase 4 (Workspaces complete)
+**Goal:** Production-ready deployment with custom domain and performance monitoring
 
 **Key Features:**
 1. Custom domain setup & DNS configuration
@@ -818,6 +885,24 @@ Deploy to a custom domain with comprehensive performance monitoring, optimizatio
 - [ ] Set up error tracking and alerting
 - [ ] Load testing and capacity planning
 - [ ] Documentation for production deployment
+
+### AUTH-004: Google OAuth Social Login
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** AUTH-001, DEPLOY-001
+**Reference:** https://www.better-auth.com/docs/authentication/google
+**Tasks:**
+- [ ] Create Google Cloud OAuth application
+- [ ] Get OAuth 2.0 Client ID and Secret
+- [ ] Add Google provider to Better Auth configuration
+- [ ] Configure authorized redirect URIs in Google Console
+- [ ] Add "Sign in with Google" button to sign-in page
+- [ ] Add "Sign up with Google" button to sign-up page
+- [ ] Test OAuth flow (authorize, callback, session creation)
+- [ ] Handle account linking (existing email matches)
+- [ ] Add Google profile picture to user accounts
+- [ ] Test with multiple Google accounts
+- [ ] Document Google OAuth setup in README
 
 ---
 
