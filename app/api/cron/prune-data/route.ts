@@ -1,6 +1,7 @@
 /**
  * Data Pruning Cron Endpoint
  * Deletes stream_metrics and stream_changes records older than 30 days
+ * Deletes activity_logs records older than 90 days
  * Should run daily at 00:00 UTC via Vercel Cron
  */
 
@@ -39,52 +40,68 @@ export async function GET(req: NextRequest) {
   try {
     console.log('Starting data pruning job...');
 
-    // Calculate cutoff date (30 days ago)
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 30);
+    // Calculate cutoff dates
+    const streamCutoffDate = new Date();
+    streamCutoffDate.setDate(streamCutoffDate.getDate() - 30); // 30 days for stream data
 
-    console.log(`Deleting records older than ${cutoffDate.toISOString()}`);
+    const activityCutoffDate = new Date();
+    activityCutoffDate.setDate(activityCutoffDate.getDate() - 90); // 90 days for activity logs
 
-    // Delete old stream_metrics records
+    console.log(`Deleting stream records older than ${streamCutoffDate.toISOString()}`);
+    console.log(`Deleting activity logs older than ${activityCutoffDate.toISOString()}`);
+
+    // Delete old stream_metrics records (30 days)
     const metricsDeleted = await client`
       DELETE FROM stream_metrics
-      WHERE recorded_at < ${cutoffDate}
+      WHERE recorded_at < ${streamCutoffDate}
     `;
 
     console.log(`Deleted ${metricsDeleted.count} stream_metrics records`);
 
-    // Delete old stream_changes records
+    // Delete old stream_changes records (30 days)
     const changesDeleted = await client`
       DELETE FROM stream_changes
-      WHERE detected_at < ${cutoffDate}
+      WHERE detected_at < ${streamCutoffDate}
     `;
 
     console.log(`Deleted ${changesDeleted.count} stream_changes records`);
+
+    // Delete old activity_logs records (90 days)
+    const activityDeleted = await client`
+      DELETE FROM activity_logs
+      WHERE created_at < ${activityCutoffDate}
+    `;
+
+    console.log(`Deleted ${activityDeleted.count} activity_logs records`);
 
     // Insert audit log entry
     await client`
       INSERT INTO data_deletion_log (
         table_name,
+        deletion_type,
         records_deleted,
-        cutoff_date,
+        oldest_record_date,
         deleted_at
       ) VALUES
-        ('stream_metrics', ${metricsDeleted.count}, ${cutoffDate}, NOW()),
-        ('stream_changes', ${changesDeleted.count}, ${cutoffDate}, NOW())
+        ('stream_metrics', 'SCHEDULED_PRUNE', ${metricsDeleted.count}, ${streamCutoffDate}, NOW()),
+        ('stream_changes', 'SCHEDULED_PRUNE', ${changesDeleted.count}, ${streamCutoffDate}, NOW()),
+        ('activity_logs', 'SCHEDULED_PRUNE', ${activityDeleted.count}, ${activityCutoffDate}, NOW())
     `;
 
     console.log('Audit log entries created');
 
-    const totalDeleted = metricsDeleted.count + changesDeleted.count;
+    const totalDeleted = metricsDeleted.count + changesDeleted.count + activityDeleted.count;
 
     return Response.json(
       {
         success: true,
         metricsDeleted: metricsDeleted.count,
         changesDeleted: changesDeleted.count,
+        activityDeleted: activityDeleted.count,
         totalDeleted,
-        cutoffDate: cutoffDate.toISOString(),
-        message: `Pruned ${totalDeleted} records older than ${cutoffDate.toISOString()}`,
+        streamCutoffDate: streamCutoffDate.toISOString(),
+        activityCutoffDate: activityCutoffDate.toISOString(),
+        message: `Pruned ${totalDeleted} records (${metricsDeleted.count} metrics, ${changesDeleted.count} changes, ${activityDeleted.count} activity logs)`,
       },
       { status: 200 }
     );

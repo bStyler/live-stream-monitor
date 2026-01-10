@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, PlayCircle, TrendingUp, Eye, Heart } from "lucide-react";
+import { ExternalLink, PlayCircle, TrendingUp, Eye, Heart, Shield } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { AddStreamDialog } from "@/components/add-stream-dialog";
@@ -74,6 +74,14 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-4">
               <AddStreamDialog />
+              {session.user?.role === 'admin' && (
+                <Button variant="outline" asChild>
+                  <Link href="/admin">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin Panel
+                  </Link>
+                </Button>
+              )}
               <span className="text-sm text-muted-foreground">
                 {session.user?.email}
               </span>

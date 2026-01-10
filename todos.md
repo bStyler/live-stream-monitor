@@ -1,7 +1,7 @@
 # YouTube Live Stream Monitor - TODO List
 
-**Last Updated:** 2026-01-05 (Phase 2 Complete! Roadmap revised for SaaS features)
-**Project Status:** ✅ Phase 1 Complete | ✅ Phase 2 Complete | 🔵 Phase 3 Planning (Admin System)
+**Last Updated:** 2026-01-09 (Phase 3 Complete! Advanced admin features and impersonation system implemented)
+**Project Status:** ✅ Phase 1 Complete | ✅ Phase 2 Complete | ✅ Phase 3 Complete | 🔵 Phase 4 Planning
 **PRD Version:** 2.0 (Approved)
 **Implementation Plan:** `plans/youtube-live-stream-monitor-mvp.md`
 
@@ -98,6 +98,21 @@
 - [x] Run `npm install` and verify no dependency conflicts
 - [x] Update package.json with exact versions
 - [x] Test dev server starts: `npm run dev`
+
+### SETUP-006: Cleanup Dropbox Development Folder
+**Status:** 🟡 Ready
+**Priority:** P3
+**Depends on:** None (Can do once C:\Dev is validated)
+**Tasks:**
+- [ ] Verify C:\Dev\live-stream-monitor builds successfully (`npm run build`)
+- [ ] Verify dev server runs without errors (`npm run dev`)
+- [ ] Test authentication flow (sign-in, sign-up, sign-out)
+- [ ] Test admin panel access and functionality
+- [ ] Verify all Phase 3 features work in C:\Dev version
+- [ ] Once validated, delete Dropbox development folder:
+  - Delete: `D:\Dropbox (Personal)\AI Vibe Coding\live-stream-monitor`
+- [ ] Update any local paths/bookmarks to point to C:\Dev\live-stream-monitor
+- [ ] Document migration in changelog or README
 
 ---
 
@@ -552,33 +567,213 @@
 
 ## Phase 3: Admin System & User Management
 
-**Status:** 🔵 Planned
+**Status:** ✅ Complete
 **Priority:** P0 (Foundation for future phases)
 **Goal:** Build admin capabilities for user management, role-based access, and stream quota allocation
 
 **Overview:**
 Enable administrators to manage users, allocate live stream monitoring slots, invite new users, and impersonate users for support purposes. This phase lays the foundation for the multi-tenancy and workspace features in Phase 4.
 
-**Key Features:**
-1. Admin role system with protected routes
-2. Admin dashboard for user management
-3. User CRUD operations (create, read, update, delete)
-4. Stream quota system (per-user slot allocation)
-5. User invitation system via email
-6. Admin user impersonation for support
+**Plan Document:** `plans/phase-3-admin-system.md`
 
-**Plan Document:** `plans/phase-3-admin-system.md` (in progress)
-
+### ADMIN-001: Admin System Foundation (Phase 1)
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** AUTH-001, DB-001
+**Completed:** 2026-01-08
+**Commit:** 1b3556f
+**Files:** `db/schema.ts`, `lib/admin-middleware.ts`, `scripts/create-admin-user.ts`, `scripts/apply-admin-migration.ts`
 **Tasks:**
-- [ ] Review and approve Phase 3 implementation plan
-- [ ] Create database migrations for admin schema
-- [ ] Implement admin middleware and role checks
-- [ ] Build admin dashboard UI
-- [ ] Create user management API endpoints
-- [ ] Implement invitation system
-- [ ] Build user impersonation functionality
-- [ ] Add comprehensive tests
-- [ ] Security audit and review
+- [x] Add admin fields to user table (role, streamQuota, isActive, lastLoginAt)
+- [x] Create database migration script
+- [x] Apply migration to production database
+- [x] Create admin middleware (requireAdmin, checkAdmin)
+- [x] Create admin user promotion script
+- [x] Test admin promotion workflow
+- [x] Verify admin middleware protects routes
+
+### ADMIN-002: Admin Dashboard UI (Phase 2)
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** ADMIN-001
+**Completed:** 2026-01-08
+**Commit:** 796d762
+**Files:** `app/admin/layout.tsx`, `app/admin/page.tsx`, `app/admin/users/page.tsx`, `app/api/admin/users/route.ts`
+**Tasks:**
+- [x] Create admin layout with navigation sidebar
+- [x] Build admin overview dashboard with stats (total users, admins, active, quota)
+- [x] Create users list page with search and filters
+- [x] Implement pagination (20 users per page)
+- [x] Add stream count to user list
+- [x] Create users API endpoint with query filters
+- [x] Add Admin Panel link to dashboard for admin users
+- [x] Test admin dashboard access and navigation
+
+### ADMIN-003: User Management CRUD Operations
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** ADMIN-002
+**Completed:** 2026-01-08
+**Commit:** 67f5a1b
+**Files:** `app/admin/users/page.tsx`, `app/api/admin/users/[id]/route.ts`
+**Tasks:**
+- [x] Add Actions dropdown menu to users table
+- [x] Implement Edit User dialog with form fields (name, email, role, quota, status)
+- [x] Create PATCH endpoint for user updates
+- [x] Create DELETE endpoint for soft delete (mark inactive)
+- [x] Add View Details navigation
+- [x] Handle loading and error states
+- [x] Test edit, delete, view functionality
+- [x] Browser test complete workflow
+
+### ADMIN-004: Activity Log Page
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** ADMIN-002
+**Completed:** 2026-01-08
+**Commit:** f84e502
+**Files:** `app/admin/activity/page.tsx`
+**Tasks:**
+- [x] Create activity log page with table layout
+- [x] Add activity type filter dropdown
+- [x] Implement color-coded badges and icons
+- [x] Create activity log data structure
+- [x] Add mock data for UI demonstration
+- [x] Display: Type, Actor, Target, Description, Timestamp
+- [x] Add info card explaining activity logging
+- [x] Browser test activity log page
+
+### ADMIN-005: User Detail Page
+**Status:** ✅ Completed
+**Priority:** P0
+**Depends on:** ADMIN-003
+**Completed:** 2026-01-08
+**Files:** `app/admin/users/[id]/page.tsx`, `app/api/admin/users/[id]/detail/route.ts`
+**Tasks:**
+- [x] Create user detail page with comprehensive info
+- [x] Add API endpoint for user details with streams
+- [x] Display user profile information (name, email, role, status, dates)
+- [x] Show stream usage stats (total, live, remaining)
+- [x] List monitored streams with thumbnails and metrics
+- [x] Add recent activity section (ready for backend)
+- [x] Implement back navigation to users list
+- [x] Add Edit User button
+
+### ADMIN-006: Activity Log Backend Integration
+**Status:** ✅ Completed
+**Priority:** P1
+**Depends on:** ADMIN-004
+**Completed:** 2026-01-09
+**Files:** `db/schema.ts`, `lib/activity-logger.ts`, `app/api/admin/activity/route.ts`, `scripts/create-activity-logs-table.ts`
+**Tasks:**
+- [x] Design activity log database schema (activityLogs table)
+- [x] Create database migration for activity logs
+- [x] Implement activity logging service (`lib/activity-logger.ts`)
+- [x] Add logging hooks to user CRUD operations
+- [x] Add logging for role changes
+- [x] Add logging for user logins
+- [x] Add logging for admin actions
+- [x] Create API endpoint: GET /api/admin/activity
+- [x] Update activity page to fetch real data
+- [x] Test activity log capture and display
+
+### ADMIN-007: Activity Log Export (Moved to Phase 5)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-006
+**Moved to:** Phase 5 - User Experience Enhancements
+**Tasks:**
+- [ ] Create CSV export endpoint: GET /api/admin/activity/export
+- [ ] Implement CSV formatting (headers, data rows)
+- [ ] Add date range filter for exports
+- [ ] Add export button to activity log page
+- [ ] Handle large datasets (streaming response)
+- [ ] Test CSV download and formatting
+- [ ] Add export audit logging
+
+### ADMIN-008: User Invitation System (Moved to Phase 5)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-002, SETUP-004 (Resend)
+**Moved to:** Phase 5 - User Experience Enhancements
+**Tasks:**
+- [ ] Create invitations table in database (already in schema)
+- [ ] Create invitation generation API: POST /api/admin/invitations
+- [ ] Implement invitation email template
+- [ ] Create invitation acceptance page: /invitations/[token]
+- [ ] Add invitation management UI to admin panel
+- [ ] Track invitation status (pending, accepted, expired)
+- [ ] Set 7-day expiration for invitations
+- [ ] Test complete invitation flow
+- [ ] Add invitation link to admin dashboard
+
+### ADMIN-009: Advanced Activity Filtering
+**Status:** ✅ Completed
+**Priority:** P2
+**Depends on:** ADMIN-006
+**Completed:** 2026-01-09
+**Files:** `app/admin/activity/page.tsx`, `app/api/admin/activity/route.ts`
+**Tasks:**
+- [x] Add date range picker to activity log page
+- [x] Implement date range filter in API
+- [x] Add actor filter (filter by admin user)
+- [x] Add target user filter
+- [x] Add activity type filter
+- [x] Implement combined filter logic
+- [x] Add filter reset button
+- [x] Test complex filter combinations
+- [x] Display active filters summary
+
+### ADMIN-010: Activity Log Retention Policies
+**Status:** ✅ Completed
+**Priority:** P2
+**Depends on:** ADMIN-006
+**Completed:** 2026-01-09
+**Files:** `app/api/cron/prune-data/route.ts`, `app/admin/activity/page.tsx`
+**Tasks:**
+- [x] Design 90-day retention policy
+- [x] Add retention policy to prune-data endpoint
+- [x] Implement automatic deletion of old activity logs
+- [x] Create audit log for deleted activity records
+- [x] Add 90-day retention info to activity page
+- [x] Test pruning logic with different cutoff dates
+- [x] Document retention policy in UI
+
+### ADMIN-011: Email Notifications for Admin Actions (Moved to Phase 5)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-006, SETUP-004 (Resend)
+**Moved to:** Phase 5 - User Experience Enhancements
+**Tasks:**
+- [ ] Design notification trigger rules
+- [ ] Create admin notification email template
+- [ ] Implement notification for user deletions
+- [ ] Implement notification for role changes
+- [ ] Implement notification for quota changes
+- [ ] Add notification settings to admin config
+- [ ] Create admin email digest (daily summary)
+- [ ] Test email delivery
+- [ ] Add unsubscribe option
+
+### ADMIN-012: User Impersonation System
+**Status:** ✅ Completed
+**Priority:** P3 (Future Enhancement)
+**Depends on:** ADMIN-002, AUTH-001
+**Completed:** 2026-01-09
+**Files:** `app/api/admin/impersonate/start/route.ts`, `app/api/admin/impersonate/stop/route.ts`, `app/api/admin/impersonate/status/route.ts`, `components/admin/impersonation-banner.tsx`, `app/layout.tsx`, `app/admin/users/page.tsx`, `scripts/create-impersonation-logs-table.ts`
+**Tasks:**
+- [x] Design impersonation session schema
+- [x] Create impersonationLogs table migration
+- [x] Implement impersonation start API: POST /api/admin/impersonate/start
+- [x] Implement impersonation stop API: POST /api/admin/impersonate/stop
+- [x] Implement impersonation status API: GET /api/admin/impersonate/status
+- [x] Add impersonation banner to UI (show "Viewing as [User]")
+- [x] Add "Stop Impersonation" button to banner
+- [x] Add "Impersonate" button to users table
+- [x] Log all impersonation sessions to database
+- [x] Restrict impersonation to non-admin users
+- [x] Add activity log entries for impersonation events
+- [x] Test impersonation flow and security
 
 ---
 
@@ -613,15 +808,64 @@ Implement workspace concept where each user gets a workspace on signup and becom
 
 ---
 
-## Phase 5: Production Domain & Performance
+## Phase 5: User Experience Enhancements & Production
 
 **Status:** 🔴 Blocked
-**Priority:** P0
+**Priority:** P1
 **Depends on:** Phase 3 & 4 (Core features complete)
-**Goal:** Production-ready deployment with custom domain and performance monitoring
+**Goal:** Polish user experience with deferred admin features and production-ready deployment
 
 **Overview:**
-Deploy to a custom domain with comprehensive performance monitoring, optimization, and production-grade infrastructure.
+Complete deferred Phase 3 admin features (activity log export, user invitations, email notifications) and deploy to production with custom domain and monitoring.
+
+### UX-001: Activity Log Export (from ADMIN-007)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-006
+**Tasks:**
+- [ ] Create CSV export endpoint: GET /api/admin/activity/export
+- [ ] Implement CSV formatting (headers, data rows)
+- [ ] Add date range filter for exports
+- [ ] Add export button to activity log page
+- [ ] Handle large datasets (streaming response)
+- [ ] Test CSV download and formatting
+- [ ] Add export audit logging
+
+### UX-002: User Invitation System (from ADMIN-008)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-002, SETUP-004 (Resend)
+**Tasks:**
+- [ ] Create invitations table in database (already in schema)
+- [ ] Create invitation generation API: POST /api/admin/invitations
+- [ ] Implement invitation email template
+- [ ] Create invitation acceptance page: /invitations/[token]
+- [ ] Add invitation management UI to admin panel
+- [ ] Track invitation status (pending, accepted, expired)
+- [ ] Set 7-day expiration for invitations
+- [ ] Test complete invitation flow
+- [ ] Add invitation link to admin dashboard
+
+### UX-003: Email Notifications for Admin Actions (from ADMIN-011)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** ADMIN-006, SETUP-004 (Resend)
+**Tasks:**
+- [ ] Design notification trigger rules
+- [ ] Create admin notification email template
+- [ ] Implement notification for user deletions
+- [ ] Implement notification for role changes
+- [ ] Implement notification for quota changes
+- [ ] Add notification settings to admin config
+- [ ] Create admin email digest (daily summary)
+- [ ] Test email delivery
+- [ ] Add unsubscribe option
+
+### PROD-001: Production Domain & Performance
+**Status:** 🔴 Blocked
+**Priority:** P0
+**Depends on:** Phase 4 (Workspaces complete)
+**Goal:** Production-ready deployment with custom domain and performance monitoring
 
 **Key Features:**
 1. Custom domain setup & DNS configuration
@@ -641,6 +885,24 @@ Deploy to a custom domain with comprehensive performance monitoring, optimizatio
 - [ ] Set up error tracking and alerting
 - [ ] Load testing and capacity planning
 - [ ] Documentation for production deployment
+
+### AUTH-004: Google OAuth Social Login
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** AUTH-001, DEPLOY-001
+**Reference:** https://www.better-auth.com/docs/authentication/google
+**Tasks:**
+- [ ] Create Google Cloud OAuth application
+- [ ] Get OAuth 2.0 Client ID and Secret
+- [ ] Add Google provider to Better Auth configuration
+- [ ] Configure authorized redirect URIs in Google Console
+- [ ] Add "Sign in with Google" button to sign-in page
+- [ ] Add "Sign up with Google" button to sign-up page
+- [ ] Test OAuth flow (authorize, callback, session creation)
+- [ ] Handle account linking (existing email matches)
+- [ ] Add Google profile picture to user accounts
+- [ ] Test with multiple Google accounts
+- [ ] Document Google OAuth setup in README
 
 ---
 
@@ -893,6 +1155,24 @@ Deploy to a custom domain with comprehensive performance monitoring, optimizatio
 - [ ] Build iOS app
 - [ ] Build Android app
 - [ ] Submit to App Store and Google Play
+
+### AUTH-004: Google OAuth Social Login (Phase 5)
+**Status:** ⏸️ Deferred
+**Priority:** P2
+**Depends on:** AUTH-001, DEPLOY-001
+**Reference:** https://www.better-auth.com/docs/authentication/google
+**Tasks:**
+- [ ] Create Google Cloud OAuth application
+- [ ] Get OAuth 2.0 Client ID and Secret
+- [ ] Add Google provider to Better Auth configuration
+- [ ] Configure authorized redirect URIs in Google Console
+- [ ] Add "Sign in with Google" button to sign-in page
+- [ ] Add "Sign up with Google" button to sign-up page
+- [ ] Test OAuth flow (authorize, callback, session creation)
+- [ ] Handle account linking (existing email matches)
+- [ ] Add Google profile picture to user accounts
+- [ ] Test with multiple Google accounts
+- [ ] Document Google OAuth setup in README
 
 ---
 

@@ -27,6 +27,12 @@ export const user = pgTable('user', {
   image: text('image'),
   createdAt: timestamp('createdAt', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updatedAt', { withTimezone: true }).notNull().defaultNow(),
+
+  // Admin system fields
+  role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
+  streamQuota: integer('stream_quota').notNull().default(1), // Trial: 1 slot, will be upgraded via billing
+  isActive: boolean('is_active').notNull().default(true),
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
 });
 
 /**
@@ -239,5 +245,88 @@ export const dataDeletionLog = pgTable(
       table.tableName,
       table.deletedAt
     ),
+  })
+);
+
+/**
+ * Admin System Tables
+ */
+
+/**
+ * invitations - User invitation system for admins
+ */
+export const invitations = pgTable(
+  'invitations',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    email: text('email').notNull(),
+    token: text('token').notNull().unique(),
+    streamQuota: integer('stream_quota').notNull().default(5),
+    invitedBy: text('invited_by')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    status: text('status', { enum: ['pending', 'accepted', 'expired'] })
+      .notNull()
+      .default('pending'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+  },
+  (table) => ({
+    tokenIdx: uniqueIndex('invitations_token_idx').on(table.token),
+    emailIdx: index('invitations_email_idx').on(table.email),
+    statusIdx: index('invitations_status_idx').on(table.status),
+  })
+);
+
+/**
+ * activityLogs - Audit trail for admin and system actions
+ */
+export const activityLogs = pgTable(
+  'activity_logs',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    type: text('type', {
+      enum: ['user_edit', 'user_delete', 'user_create', 'role_change', 'login', 'signup'],
+    }).notNull(),
+    adminId: text('admin_id').references(() => user.id, { onDelete: 'set null' }),
+    adminName: text('admin_name'),
+    targetUserId: text('target_user_id').references(() => user.id, { onDelete: 'set null' }),
+    targetUserName: text('target_user_name'),
+    targetUserEmail: text('target_user_email'),
+    description: text('description').notNull(),
+    metadata: jsonb('metadata'), // Additional data (old/new values, etc.)
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    typeIdx: index('activity_logs_type_idx').on(table.type),
+    adminIdIdx: index('activity_logs_admin_id_idx').on(table.adminId),
+    targetUserIdIdx: index('activity_logs_target_user_id_idx').on(table.targetUserId),
+    createdAtIdx: index('activity_logs_created_at_idx').on(table.createdAt),
+  })
+);
+
+/**
+ * impersonationLogs - Audit trail for admin impersonation
+ */
+export const impersonationLogs = pgTable(
+  'impersonation_logs',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    adminId: text('admin_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    targetUserId: text('target_user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    endedAt: timestamp('ended_at', { withTimezone: true }),
+    ipAddress: text('ip_address'),
+    userAgent: text('user_agent'),
+  },
+  (table) => ({
+    adminIdIdx: index('impersonation_logs_admin_id_idx').on(table.adminId),
+    targetUserIdIdx: index('impersonation_logs_target_user_id_idx').on(table.targetUserId),
+    startedAtIdx: index('impersonation_logs_started_at_idx').on(table.startedAt),
   })
 );
